@@ -12,6 +12,8 @@ from region
 
 
 
+
+
 -- 1. copy your csv file to docker container using this command 
 
 -- 2. docker cp /Users/sukhsodhi/Downloads/archive/noc_regions.csv sukh-postgres:/docker-entrypoint-initdb.d/noc_regions.csv
