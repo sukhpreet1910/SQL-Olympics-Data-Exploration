@@ -329,14 +329,34 @@ with count as
     GROUP BY region, sport
 ),
 
-as rank
+rank as
 (
     select *, dense_rank() over(order by medals desc) as Rank
     from count
 )
 
-s
+select country, sport, medals
+from rank 
+where rank = 1
 
 
+-- or 
+
+
+select region as country, sport, count(medal) as medals
+from olympic_history o
+join region r
+on o.noc = r.noc
+where medal <> 'NA' and region = 'India'
+GROUP BY region, sport
 order by 3 DESC
 limit 1
+
+
+-- 20. Break down all olympic games where india won medal for Hockey and how many medals in each olympic games.
+
+SELECT team, sport, games, count(medal) as medals
+from olympic_history o
+where medal <> 'NA' and team = 'India' and sport = 'Hockey'
+group by team, sport, games
+order by games
