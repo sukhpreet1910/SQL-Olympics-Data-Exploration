@@ -123,5 +123,66 @@ group by games
 order by 2 desc
 
 
-select distinct games, sport 
-from olympic_history
+with t1 AS
+(
+    select distinct games, sport 
+    from olympic_history
+)
+
+select games, count(1) 
+from t1
+group by games
+order by 2
+
+
+-- 9. Fetch details of the oldest athletes to win a gold medal.
+with gold as 
+(
+    SELECT *
+    from olympic_history
+    where medal = 'Gold' and age <> 'NA'
+    order by age desc
+),
+rank as 
+(
+    select *, rank() over(order by age desc) as rank
+    from gold 
+)
+
+SELECT * 
+from rank
+where rank = 1
+
+
+-- 10. Find the Ratio of male and female athletes participated in all olympic games.
+
+with ratio as 
+(
+    SELECT sex, count(sex) count
+    from olympic_history
+    group by sex
+),
+
+/*rank as 
+(
+    select *, row_number() over(order by count) as rn
+    from ratio
+),*/
+
+min_count as 
+(
+    SELECT min(count) as min 
+    from ratio
+    --where rn = 1
+),
+
+max_count as
+(
+    SELECT max(count) as max  
+    from ratio 
+   -- where rn = 2
+)
+
+
+select concat('1 : ', round(max_count.max::decimal/min_count.min, 2)) as ratio
+from max_count, min_count
