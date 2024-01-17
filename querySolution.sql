@@ -183,6 +183,160 @@ max_count as
    -- where rn = 2
 )
 
-
-select concat('1 : ', round(max_count.max::decimal/min_count.min, 2)) as ratio
+select concat('1 : ', round(max_count.max::DECIMAL/min_count.min, 2)) as ratio
 from max_count, min_count
+
+
+-- 11. Fetch the top 5 athletes who have won the most gold medals.
+with cn as 
+(
+    select team, name, count(medal) as count
+    from olympic_history
+    where medal = "Gold"
+    group by name, team
+    ORDER BY 3 desc
+),
+rn as
+(
+    select *, dense_rank() over(order by count desc) as rank
+    from cn
+)
+
+select name, team, count
+from rn 
+where rank <= 5
+
+
+-- 12. Fetch the top 5 athletes who have won the most medals (gold/silver/bronze).
+
+with cn as 
+(
+    select team, name, count(medal) as count
+    from olympic_history
+    where medal in ('Gold', 'Silver', 'Bronze')
+    group by name, team
+    ORDER BY 3 desc
+),
+rn as
+(
+    select *, dense_rank() over(order by count desc) as rank
+    from cn
+)
+
+select name, team, count
+from rn 
+where rank <= 5
+
+
+-- 13. Fetch the top 5 most successful countries in olympics. Success is defined by no of medals won.
+
+-- Using Join, CTE and Rank() window function
+with cn as 
+(
+    select region, count(medal) as count
+    from olympic_history o
+    join region r
+    on o.noc = r.noc
+    where medal in ('Gold', 'Silver', 'Bronze')
+    group by region
+),
+
+rn as
+(
+    select *, rank() over(order by count desc) as rank
+    from cn
+)
+
+select * 
+from rn
+where rank <= 5
+
+
+-- Using join and Limit Clause
+
+/*select 
+    region, count(medal) as count
+from 
+    olympic_history o
+join 
+    region r
+on 
+    o.noc = r.noc
+where 
+    medal in ('Gold', 'Silver', 'Bronze')
+group by region
+order by 2 desc
+limit 5*/
+
+
+-- 14. List down total gold, silver and broze medals won by each country.
+with g as
+(
+select region, count(medal) as Gold
+from olympic_history o
+join region r 
+on o.noc = r.noc
+where medal = 'Gold'
+group by region
+),
+
+silver as 
+(
+select region, count(medal) as Silver
+from olympic_history o
+join region r 
+on o.noc = r.noc
+where medal = 'Silver'
+group by region
+),
+
+bronze as
+(
+select region, count(medal) as Bronze
+from olympic_history o
+join region r 
+on o.noc = r.noc
+where medal = 'Bronze'
+group by region
+)
+
+select g.*, silver.Silver, bronze.Bronze
+from g
+join silver 
+on g.region = silver.region
+join bronze
+on g.region = bronze.region
+order by 2 desc, 3 desc, 4 desc
+
+
+-- Understang CROSSTAB before doing this
+-- 15. List down total gold, silver and broze medals won by each country corresponding to each olympic games.
+-- 16. Identify which country won the most gold, most silver and most bronze medals in each olympic games.
+-- 17. Identify which country won the most gold, most silver, most bronze medals and the most medals in each olympic games.
+-- 18. Which countries have never won gold medal but have won silver/bronze medals?
+
+
+
+-- 19. In which Sport/event, India has won highest medals.
+
+with count as 
+(
+    select region as country, sport, count(medal) as medals
+    from olympic_history o
+    join region r
+    on o.noc = r.noc
+    where medal <> 'NA' and region = 'India'
+    GROUP BY region, sport
+),
+
+as rank
+(
+    select *, dense_rank() over(order by medals desc) as Rank
+    from count
+)
+
+s
+
+
+order by 3 DESC
+limit 1
