@@ -519,19 +519,6 @@ where gold = 0 and (silver > 0 or bronze > 0)
 order by gold desc nulls last, silver desc nulls last, bronze desc nulls last;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 -- 19. In which Sport/event, India has won highest medals.
 
 with count as 
